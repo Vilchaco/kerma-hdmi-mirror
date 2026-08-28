@@ -1,0 +1,82 @@
+name: Release
+
+# Al subir una etiqueta como v2.2.1, GitHub compila la app en Windows,
+# empaqueta el .exe con el manual y publica la release con las notas de esa
+# version en CHANGELOG.md. Nadie tiene que compilar a mano.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: La etiqueta coincide con la version del proyecto
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          CSPROJ=$(sed -nE 's/.*<Version>([^<]+)<\/Version>.*/\1/p' src/HdmiMirror.csproj)
+          if [ "$VERSION" != "$CSPROJ" ]; then
+            echo "::error file=src/HdmiMirror.csproj::La etiqueta es $GITHUB_REF_NAME pero el proyecto dice <Version>$CSPROJ</Version>. Corrige una de las dos."
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "ZIP=HdmiMirror-v$VERSION.zip" >> "$GITHUB_ENV"
+
+      - name: Notas desde CHANGELOG.md
+        run: |
+          awk -v v="$VERSION" '
+            index($0, "## [" v "]") == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md no tiene seccion para [$VERSION]"
+            exit 1
+          fi
+          sed "s#__REPO__#${GITHUB_REPOSITORY}#g" .github/release-footer.md >> notes.md
+          TITLE=$(grep -m1 -F "## [$VERSION]" CHANGELOG.md | sed -E 's/^## \[[^]]+\] - [0-9-]+ - //')
+          echo "TITLE=$TITLE" >> "$GITHUB_ENV"
+
+      - name: Compilar el exe
+        run: >
+          dotnet publish src/HdmiMirror.csproj -c Release -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:DebugType=none
+          -o dist/HdmiMirror
+
+      - name: Empaquetar
+        shell: pwsh
+        run: |
+          Copy-Item docs/MANUAL.html, CHANGELOG.md dist/HdmiMirror/
+          Get-ChildItem dist/HdmiMirror | Format-Table Name, Length -AutoSize
+          Compress-Archive -Path dist/HdmiMirror -DestinationPath "dist/$env:ZIP"
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Solo la version mas alta queda marcada como "Latest"
+          HIGHEST=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          if [ "$HIGHEST" = "$GITHUB_REF_NAME" ]; then LATEST=true; else LATEST=false; fi
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME - $TITLE" --notes-file notes.md --latest=$LATEST
+            gh release upload "$GITHUB_REF_NAME" "dist/$ZIP" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "dist/$ZIP" --title "$GITHUB_REF_NAME - $TITLE" --notes-file notes.md --latest=$LATEST --verify-tag
+          fi

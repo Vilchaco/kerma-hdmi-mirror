@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>HdmiMirror</AssemblyName>
+    <!-- UNICA fuente de la version. El pie del panel la lee del ensamblado y
+         el zip del Drive se nombra con ella: subir version = tocar solo esto. -->
+    <Version>2.1.0</Version>
+    <RootNamespace>HdmiMirror</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon>icono.ico</ApplicationIcon>
+    <!-- La app no formatea nada dependiente de cultura: sin las tablas ICU el
+         publish autocontenido pesa varios MB menos y arranca antes. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+</Project>

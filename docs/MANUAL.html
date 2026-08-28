@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>HdmiMirror — Manual de instalación y uso</title>
+<style>
+  body { font-family: "Segoe UI", system-ui, sans-serif; max-width: 820px;
+         margin: 0 auto; padding: 32px 24px 64px; color: #222; line-height: 1.55; }
+  h1 { font-size: 1.9em; margin-bottom: 4px; }
+  .sub { color: #666; margin-top: 0; }
+  h2 { font-size: 1.25em; color: #26609e; border-bottom: 2px solid #e4e4e2;
+       padding-bottom: 6px; margin-top: 40px; }
+  h3 { font-size: 1.05em; margin-top: 24px; }
+  code, kbd { background: #f2f2f0; border-radius: 4px; padding: 1px 6px;
+              font-size: 0.92em; }
+  kbd { border: 1px solid #ccc; border-bottom-width: 2px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left;
+           vertical-align: top; }
+  th { background: #f7f7f5; }
+  .aviso { background: #fff7e0; border-left: 4px solid #e0a800;
+           padding: 10px 14px; margin: 14px 0; }
+  .ok { background: #e0f4ec; border-left: 4px solid #0b5e4a;
+        padding: 10px 14px; margin: 14px 0; }
+  ol li, ul li { margin-bottom: 6px; }
+  .paso { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>HdmiMirror</h1>
+<p class="sub">Espejo de pantalla para los prompters de las mesas · Manual de instalación y uso · Kerma Games</p>
+
+<h2>1. Qué es y qué sustituye</h2>
+<p>HdmiMirror muestra la dealer app <strong>espejada</strong> en el monitor del
+prompter, para que se lea correctamente en el reflejo del cristal.
+Sustituye al montaje anterior de <strong>OBS + monitores virtuales de
+RustDesk</strong>, y arregla sus tres problemas:</p>
+<ul>
+  <li>Los clics del supervisor <strong>atraviesan el espejo</strong> y llegan a la dealer app (con OBS se quedaban en la proyección).</li>
+  <li>El escáner de cartas sigue funcionando: la app <strong>devuelve el foco</strong> a la dealer app automáticamente.</li>
+  <li>Por RustDesk se ve la dealer app <strong>normal, sin espejar</strong>: el espejo es invisible para las capturas. Ya no hacen falta monitores virtuales.</li>
+</ul>
+
+<h2>2. Requisitos</h2>
+<ul>
+  <li>Windows 10 versión 2004 (año 2020) o superior. <strong>Windows 11 vale.</strong></li>
+  <li>Nada más si ya existe la carpeta <code>Compilado</code> (ver siguiente punto).</li>
+</ul>
+
+<h2>3. Instalación en una mesa</h2>
+<div class="ok"><strong>Caso normal:</strong> si en el paquete del Drive ya existe la carpeta
+<code>Compilado</code> con <code>HdmiMirror.exe</code> dentro, NO hay que instalar nada:
+copia esa carpeta al PC de la mesa (por ejemplo a <code>C:\HdmiMirror</code>) y listo.
+Salta al punto 5.</div>
+
+<h2>4. Compilar (solo si no existe la carpeta <code>Compilado</code>)</h2>
+<p>Esto lo hace <strong>una sola persona una sola vez</strong>; después se sube la
+carpeta <code>Compilado</code> al Drive y nadie más tiene que repetirlo.</p>
+<ol>
+  <li>Instala el <strong>SDK de .NET 8</strong> desde
+      <code>dotnet.microsoft.com/es-es/download/dotnet/8.0</code>.
+      Descarga de la columna <strong>SDK</strong> (no "Runtime"): Windows → x64 → Installer.</li>
+  <li>Reinicia el PC después de instalarlo.</li>
+  <li>Doble clic en <code>COMPILAR.bat</code> (está junto a este manual, en la carpeta del código).</li>
+  <li>Espera 1-3 minutos. Cuando diga <strong>LISTO</strong>, aparece la carpeta <code>Compilado</code>.</li>
+  <li><strong>Sube la carpeta <code>Compilado</code> al Drive</strong> para el resto de técnicos.</li>
+</ol>
+
+<h2>5. Puesta en marcha en la mesa</h2>
+<ol>
+  <li>Abre la dealer app y déjala <strong>maximizada en el monitor del prompter</strong>.</li>
+  <li>Doble clic en <code>HdmiMirror.exe</code>.
+      Si Windows muestra el aviso azul "Windows protegió tu PC": <em>Más información → Ejecutar de todas formas</em> (sale porque el programa no está firmado; es normal).</li>
+  <li><span class="paso">Recomendado:</span> ciérralo y vuelve a abrirlo con
+      <strong>clic derecho → Ejecutar como administrador</strong>. Si la dealer app corre
+      elevada, sin esto Windows bloquea la devolución del foco y la recolocación de clics.</li>
+  <li>Configura el panel:
+    <table>
+      <tr><th>Campo</th><th>Valor para las mesas</th></tr>
+      <tr><td>Dealer app</td><td>La ventana de la dealer app. Es la única decisión de la mesa: esa ventana se captura para el espejo <strong>y</strong> recibe el foco para el escáner. El botón ⟳ vuelve a buscar ventanas.</td></tr>
+      <tr><td>Prompter</td><td>El monitor donde está el prompter</td></tr>
+      <tr><td>El supervisor mira</td><td><code>El cristal</code> (clics directos) o <code>El panel físico</code> (clics recolocados espejados)</td></tr>
+      <tr><td colspan="2"><em>En "Ajustes avanzados" (normalmente no hay que tocarlos):</em></td></tr>
+      <tr><td>Origen de imagen</td><td><code>Ventana de la dealer app</code> (por defecto) o un monitor completo</td></tr>
+      <tr><td>Espejo · FPS</td><td><code>Horizontal</code> · <code>20</code> (baja a 10-15 si la mesa va justa)</td></tr>
+      <tr><td>Devolver el foco</td><td>Activado — necesario para el escáner de cartas</td></tr>
+      <tr><td>Ocultar de capturas</td><td>Activado — es lo que hace que RustDesk vea la app sin espejar</td></tr>
+      <tr><td>Dibujar el cursor</td><td>Activado</td></tr>
+    </table>
+  </li>
+  <li>Pulsa <strong>Iniciar espejo</strong> (el botón grande de la tarjeta de estado, arriba).
+      La tarjeta se pone verde y los chips muestran la salud: captura, foco y autoarranque.
+      Si algo falla, la tarjeta se pone roja y dice el motivo.</li>
+  <li>Comprueba: se ve espejado en el prompter, el escáner mete cartas, los clics llegan,
+      y por RustDesk se ve la app normal.</li>
+</ol>
+<p>La configuración <strong>se guarda sola</strong> (archivo
+<code>hdmimirror.config.json</code> junto al exe): la próxima vez que se abra ya
+estará todo puesto.</p>
+
+<h2>6. Inicio automático del espejo</h2>
+<p>El arranque de las apps de la mesa lo gestiona el <strong>lanzador escalonado</strong>
+de cada PC (con sus delays); HdmiMirror no se registra en el arranque de Windows.
+Lo que sí hace es iniciarse solo una vez abierto:</p>
+<ol>
+  <li>Añade <code>HdmiMirror.exe</code> al lanzador escalonado de la mesa, con un delay
+      posterior al de la dealer app (o anterior — la app espera igualmente).</li>
+  <li>En HdmiMirror, marca <strong>"Iniciar el espejo al abrir la app"</strong>
+      (en Ajustes avanzados; el chip de estado dice si está activado).</li>
+  <li>A partir de ahí, cada vez que la app se abra: espera a que exista la ventana de la
+      dealer app, inicia el espejo con la última configuración, activa la devolución de
+      foco si estaba activada, y se minimiza.</li>
+</ol>
+<div class="aviso"><strong>Si la mesa necesita HdmiMirror como administrador</strong>, configura
+el lanzador para ejecutarlo elevado. Y si en alguna mesa se marcó la casilla antigua de
+"arrancar con Windows", no hay que hacer nada: la app borra ese registro antiguo ella sola
+la próxima vez que se abra.</div>
+
+<h2>7. Atajos de teclado (funcionan siempre, aunque el espejo tape todo)</h2>
+<table>
+  <tr><th>Atajo</th><th>Qué hace</th></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>M</kbd></td><td><strong>Para el espejo</strong> y muestra el panel. Es la salida: la ventana espejo no aparece en Alt+Tab ni se puede clicar.</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F</kbd></td><td>Pausa/reanuda la devolución de foco. Púlsalo ANTES de trabajar en otra app de ese PC (si no, lo que teclees puede acabar en la dealer app) y de nuevo al terminar.</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd></td><td>Genera un diagnóstico en el Escritorio (<code>HdmiMirror-diagnostico.txt</code>). Adjúntalo cuando reportes un problema.</td></tr>
+</table>
+
+<h2>8. Problemas frecuentes</h2>
+<table>
+  <tr><th>Síntoma</th><th>Causa y solución</th></tr>
+  <tr><td>Imagen dentro de imagen (efecto túnel)</td><td>"Ocultar de capturas" está desactivado y se captura el mismo monitor donde se muestra. Actívalo, o deja "Origen de imagen" en "Ventana de la dealer app".</td></tr>
+  <tr><td>El espejo sale blanco o negro en modo Ventana</td><td>Esa app no se deja capturar directamente. La app lo detecta sola en ~1 segundo y cambia a capturar el rectángulo de pantalla; si el problema persiste, el motivo aparece escrito en la propia pantalla y en la tarjeta de estado. Ejecutar como administrador suele resolverlo; si no, cambia "Origen de imagen" a un monitor.</td></tr>
+  <tr><td>Reinicio la dealer app y el espejo se queda sin imagen</td><td>Se re-engancha solo en unos segundos buscando la ventana por título. Si el título de la ventana cambia entre sesiones, reelige la dealer app y pulsa Iniciar.</td></tr>
+  <tr><td>El escáner no mete cartas / el panel dice "no se pudo devolver el foco"</td><td>Casi seguro la dealer app corre como administrador y HdmiMirror no. Cierra HdmiMirror y ábrelo con clic derecho → Ejecutar como administrador. Confírmalo con <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd>.</td></tr>
+  <tr><td>Los clics no responden</td><td>Comprueba "El supervisor mira" (punto 5): si mira el cristal debe estar en "El cristal". Ejecutar como administrador también afecta aquí.</td></tr>
+  <tr><td>Escribo o clico en otra app y no responde / el texto se va a la dealer app</td><td>Es el vigilante de foco haciendo su trabajo: cada vez que otra app pasa a primer plano, se lo devuelve a la dealer app. Pausa con <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F</kbd> mientras trabajas en otra cosa y reanuda al terminar. Las demás ventanas de la propia dealer app (número ganador, rueda…) y el panel de HdmiMirror NO disparan el vigilante.</td></tr>
+  <tr><td>El espejo parpadea</td><td>La dealer app pelea por estar arriba. Con "Devolver el foco" activado, pulsa "Quitar always-on-top" en Ajustes avanzados.</td></tr>
+  <tr><td>El ratón va a tirones</td><td>Baja los FPS a 10-15.</td></tr>
+  <tr><td>Por RustDesk se ve el espejo (imagen invertida)</td><td>"Ocultar de capturas" desactivado, o Windows anterior a 10 2004. Actívalo / actualiza Windows.</td></tr>
+</table>
+
+<h2>9. Consumo y rendimiento</h2>
+<ul>
+  <li>Lo único que consume de forma continua es la captura de imagen, y es
+      <strong>proporcional a los FPS</strong>: a 10 FPS consume la mitad que a 20.
+      La UI de la dealer app cambia poco; si la mesa va justa de CPU, baja a 10-15
+      sin miedo.</li>
+  <li>La devolución de foco funciona por eventos: <strong>no consume nada</strong>
+      mientras nadie roba el foco. Si aparece "reintentando cada 10 s" en el panel,
+      ejecuta como administrador (punto 7).</li>
+  <li>No hace falta cerrar HdmiMirror al final del turno; puede quedarse en marcha.</li>
+</ul>
+
+<h2>10. Contenido del paquete</h2>
+<table>
+  <tr><td><code>MANUAL.html</code></td><td>Este manual.</td></tr>
+  <tr><td><code>CHANGELOG.md</code></td><td>Historial de versiones. La versión instalada se ve abajo a la derecha del panel de HdmiMirror.</td></tr>
+  <tr><td><code>Compilado\HdmiMirror.exe</code></td><td>El programa listo para usar (si ya lo compiló alguien; es lo único que se copia a las mesas).</td></tr>
+  <tr><td><code>COMPILAR.bat</code> + archivos <code>.cs</code></td><td>Código fuente y compilador. Solo para el punto 4.</td></tr>
+</table>
+
+</body>
+</html>

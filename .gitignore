@@ -1,0 +1,10 @@
+# Salida de compilacion
+bin/
+obj/
+Compilado/
+dist/
+.vs/
+*.user
+# Lo crea la app en cada mesa: nunca subirlo
+hdmimirror.config.json
+.DS_Store

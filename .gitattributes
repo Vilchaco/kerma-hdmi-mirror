@@ -1,0 +1,8 @@
+* text=auto
+# Los .bat necesitan CRLF en Windows, tambien dentro del zip
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.cs  text eol=lf
+*.md  text eol=lf
+*.yml text eol=lf
+*.ico binary
