@@ -9,7 +9,7 @@
     <AssemblyName>HdmiMirror</AssemblyName>
     <!-- UNICA fuente de la version. El pie del panel la lee del ensamblado y
          el zip del Drive se nombra con ella: subir version = tocar solo esto. -->
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <RootNamespace>HdmiMirror</RootNamespace>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationIcon>icono.ico</ApplicationIcon>

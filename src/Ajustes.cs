@@ -25,6 +25,15 @@ internal sealed class Ajustes
     /// <summary>Al abrir la app, esperar a la dealer app e iniciar el espejo solo.</summary>
     public bool IniciarAlAbrir { get; set; }
 
+    /// <summary>
+    /// Posicion del panel en pantalla. null = nunca se ha movido: centrado.
+    /// El tamaño no se guarda porque no es libre: lo decide el contenido, y lo
+    /// unico que lo cambia es si "Ajustes avanzados" esta desplegado.
+    /// </summary>
+    public int? PanelX { get; set; }
+    public int? PanelY { get; set; }
+    public bool AvanzadoAbierto { get; set; }
+
     private static string Ruta =>
         Path.Combine(AppContext.BaseDirectory, "hdmimirror.config.json");
 

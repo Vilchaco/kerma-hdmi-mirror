@@ -164,6 +164,12 @@ internal sealed class PanelControl : Form
 
         CargarListas();
         AplicarAjustes(Ajustes.Cargar());
+        RestaurarPosicion();
+
+        // Al terminar de arrastrar la ventana se guarda en el momento: en modo
+        // automatico la app vive minimizada y puede no cerrarse nunca de forma
+        // ordenada (apagado de la mesa), asi que esperar al cierre no basta.
+        ResizeEnd += (s, e) => GuardarAjustes();
 
         // Versiones anteriores registraban la app en el arranque de Windows;
         // ahora eso lo hace el lanzador escalonado de la mesa. Se borra lo que
@@ -180,6 +186,32 @@ internal sealed class PanelControl : Form
         }
 
         RefrescarEstado();
+    }
+
+    /// <summary>
+    /// Coloca el panel donde se dejo la ultima vez, para que al lanzarse solo
+    /// no aparezca encima de la dealer app.
+    ///
+    /// Solo si la posicion guardada sigue siendo visible: si el monitor donde
+    /// estaba ya no existe (p.ej. al quitar los monitores virtuales de RustDesk)
+    /// la ventana acabaria fuera de pantalla e inalcanzable, asi que en ese
+    /// caso se vuelve a centrar.
+    /// </summary>
+    private void RestaurarPosicion()
+    {
+        if (_ajustes.PanelX is not int x || _ajustes.PanelY is not int y)
+            return;
+
+        // La barra de titulo (lo que hace falta para poder arrastrarla) tiene
+        // que caer dentro del area util de algun monitor.
+        var agarre = new Rectangle(x + 40, y + 4, 120, 20);
+        bool visible = Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(agarre));
+
+        if (!visible)
+            return;
+
+        StartPosition = FormStartPosition.Manual;
+        Location = new Point(x, y);
     }
 
     // =============================================================== zona 1
@@ -337,10 +369,16 @@ internal sealed class PanelControl : Form
         _btnAvanzado.Text = "▼  Ajustes avanzados";
         _btnAvanzado.Click += (s, e) =>
         {
-            _pnlAvanzado.Visible = !_pnlAvanzado.Visible;
-            _btnAvanzado.Text = (_pnlAvanzado.Visible ? "▲" : "▼") + "  Ajustes avanzados";
+            MostrarAvanzado(!_pnlAvanzado.Visible);
+            GuardarAjustes();
         };
         return _btnAvanzado;
+    }
+
+    private void MostrarAvanzado(bool abierto)
+    {
+        _pnlAvanzado.Visible = abierto;
+        _btnAvanzado.Text = (abierto ? "▲" : "▼") + "  Ajustes avanzados";
     }
 
     private Control ConstruirAvanzado()
@@ -788,6 +826,7 @@ internal sealed class PanelControl : Form
 
         _ajustandoAutoarranque = true;
         _chkAutoarranque.Checked = a.IniciarAlAbrir;
+        MostrarAvanzado(a.AvanzadoAbierto);
         _ajustandoAutoarranque = false;
 
         _ajustandoFoco = true;
@@ -815,6 +854,16 @@ internal sealed class PanelControl : Form
         _ajustes.ClicsEspejados = _mirarPanel;
         _ajustes.VigilanteActivo = _chkDevolverFoco.Checked;
         _ajustes.IniciarAlAbrir = _chkAutoarranque.Checked;
+        _ajustes.AvanzadoAbierto = _pnlAvanzado.Visible;
+
+        // Minimizada, Location vale (-32000,-32000); la posicion "de verdad"
+        // es la que tendria al restaurarse.
+        if (IsHandleCreated)
+        {
+            Point p = WindowState == FormWindowState.Normal ? Location : RestoreBounds.Location;
+            _ajustes.PanelX = p.X;
+            _ajustes.PanelY = p.Y;
+        }
 
         _ajustes.Guardar();
     }

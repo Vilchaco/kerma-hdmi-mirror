@@ -4,6 +4,18 @@ Todas las versiones de HdmiMirror, de la más reciente a la más antigua. El for
 
 Las versiones anteriores a la 2.1.0 se entregaron sin número y su código no se conservó: sus entradas están reconstruidas para tener referencia, pero no tienen descarga.
 
+## [2.2.0] - 2026-09-22 - El panel recuerda su posición
+
+### Añadido
+- El panel aparece donde se dejó la última vez, también cuando lo abre el lanzador de la mesa. Así no sale encima de la Dealer App. Se guarda al terminar de arrastrarlo.
+- Recuerda si **Ajustes avanzados** estaba desplegado.
+
+### Corregido
+- Si la posición guardada ya no se ve, por ejemplo porque estaba en un monitor virtual que se quitó, el panel vuelve al centro en vez de abrirse fuera de pantalla.
+
+### A tener en cuenta
+- Primera versión que se publica en GitHub ya compilada. El manual explica cómo descargarla y actualizar.
+
 ## [2.1.0] - 2026-08-28 - Iniciar el espejo al abrir la app
 
 ### Cambiado
