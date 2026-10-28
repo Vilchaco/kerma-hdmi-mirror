@@ -4,6 +4,19 @@ Todas las versiones de HdmiMirror, de la más reciente a la más antigua. El for
 
 Las versiones anteriores a la 2.1.0 se entregaron sin número y su código no se conservó: sus entradas están reconstruidas para tener referencia, pero no tienen descarga.
 
+## [2.3.1] - 2026-10-28 - El prompter no cambia de monitor al reiniciar
+
+### Corregido
+- Con **Iniciar el espejo al abrir la app**, después de reiniciar el prompter volvía al monitor 1 y había que elegir otra vez el bueno. La espera a la dealer app recargaba la lista de monitores y perdía la elección.
+- El prompter y el origen de imagen se recuerdan por la pantalla (su sitio en el escritorio y su nombre en Windows), no por su número en la lista, que Windows puede cambiar al reiniciar o con los monitores virtuales de RustDesk.
+- Refrescar la lista ya no cambia el monitor elegido.
+
+### Añadido
+- Si al arrancar el monitor del prompter tarda en aparecer, se le espera hasta un minuto («Esperando al monitor del prompter...»). Si no llega, arranca con el que haya, como antes, sin olvidar el guardado.
+
+### A tener en cuenta
+- Tras actualizar, elige el monitor del prompter una vez más para que se guarde de la forma nueva.
+
 ## [2.3.0] - 2026-10-28 - Marca Kerma
 
 ### Cambiado
