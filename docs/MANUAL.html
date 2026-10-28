@@ -3,27 +3,48 @@
 <head>
 <meta charset="utf-8">
 <title>HdmiMirror — Manual de instalación y uso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Orbitron:wght@700&display=swap">
 <style>
-  body { font-family: "Segoe UI", system-ui, sans-serif; max-width: 820px;
-         margin: 0 auto; padding: 32px 24px 64px; color: #222; line-height: 1.55; }
-  h1 { font-size: 1.9em; margin-bottom: 4px; }
-  .sub { color: #666; margin-top: 0; }
-  h2 { font-size: 1.25em; color: #26609e; border-bottom: 2px solid #e4e4e2;
-       padding-bottom: 6px; margin-top: 40px; }
-  h3 { font-size: 1.05em; margin-top: 24px; }
-  code, kbd { background: #f2f2f0; border-radius: 4px; padding: 1px 6px;
-              font-size: 0.92em; }
-  kbd { border: 1px solid #ccc; border-bottom-width: 2px; }
+  /* BRANDBOOK · Kerma Games Brandbook 2026, págs. 21 y 26. Mismos tokens que la app
+     (src/Marca.cs) y que Tech Inventory. Sin internet, la letra cae a Segoe UI. */
+  :root {
+    --bg: #0a0712;          /* Kerma Black Magic */
+    --card: #110c1f;        /* Kerma Jambolan */
+    --card2: #161029;
+    --line2: #353041;
+    --txt: #ffffff;
+    --mut: color-mix(in srgb, #cfced2 70%, #0a0712);
+    --mut2: color-mix(in srgb, #cfced2 45%, #0a0712);
+    --acc: #ea7f2b;         /* Kerma Honeybell */
+    --warn: #f4c95d;        /* avisos en amarillo: el naranja es el acento */
+    --sans: 'Sora', 'Segoe UI', system-ui, sans-serif;
+    --display: 'Orbitron', 'Sora', 'Segoe UI', sans-serif;
+  }
+  html { color-scheme: dark; background: var(--bg); }
+  body { font: 15px/1.6 var(--sans); max-width: 820px; margin: 0 auto;
+         padding: 40px 24px 72px; background: var(--bg); color: var(--txt); }
+  h1 { font-family: var(--display); font-size: 30px; font-weight: 700; margin: 0 0 6px; }
+  .sub { color: var(--mut); margin-top: 0; }
+  h2 { font-size: 19px; font-weight: 600; border-bottom: 1px solid var(--line2);
+       padding-bottom: 8px; margin-top: 44px; }
+  h3 { font-size: 16px; font-weight: 600; margin-top: 24px; }
+  p, li, td { color: var(--txt); }
+  a { color: var(--txt); text-underline-offset: 2px; }
+  code, kbd { background: var(--card2); color: var(--txt); border-radius: 5px;
+              padding: 1px 6px; font-size: 0.9em; }
+  kbd { border: 1px solid var(--line2); border-bottom-width: 2px; }
   table { border-collapse: collapse; width: 100%; margin: 12px 0; }
-  th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left;
-           vertical-align: top; }
-  th { background: #f7f7f5; }
-  .aviso { background: #fff7e0; border-left: 4px solid #e0a800;
-           padding: 10px 14px; margin: 14px 0; }
-  .ok { background: #e0f4ec; border-left: 4px solid #0b5e4a;
-        padding: 10px 14px; margin: 14px 0; }
+  th, td { border: 1px solid var(--line2); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--card2); font-weight: 600; }
+  td { background: var(--card); }
+  .aviso, .ok { background: var(--card); border: 1px solid var(--line2); border-radius: 10px;
+                padding: 12px 16px; margin: 16px 0; }
+  .aviso strong { color: var(--warn); }
   ol li, ul li { margin-bottom: 6px; }
+  li::marker { color: var(--mut2); }
   .paso { font-weight: 600; }
+  ::selection { background: color-mix(in srgb, var(--acc) 35%, transparent); }
 </style>
 </head>
 <body>
@@ -51,7 +72,7 @@ RustDesk</strong>, y arregla sus tres problemas:</p>
 <h2>3. Descargar e instalar en una mesa</h2>
 <p>La app se publica en GitHub:
 <code>github.com/Vilchaco/kerma-hdmi-mirror/releases/latest</code>.
-El repositorio es privado; si no puedes entrar, pide acceso a Fran.</p>
+El repositorio es público: se descarga sin cuenta de GitHub.</p>
 <ol>
   <li>Descarga el zip de la última versión, en el apartado <strong>Assets</strong> de la release
       (<code>HdmiMirror-vX.Y.Z.zip</code>).</li>

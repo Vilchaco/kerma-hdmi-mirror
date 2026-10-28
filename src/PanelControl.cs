@@ -304,7 +304,7 @@ internal sealed partial class PanelControl : Form
         _lblEstadoSub.SetBounds(38, 35, Ancho - 38 - 160, 32);   // hasta dos lineas: los avisos son largos
         _lblEstadoSub.Font = Marca.Sora(8.5F);
         _lblEstadoSub.ForeColor = TintaSuave;
-        _lblEstadoSub.AutoEllipsis = true;
+        _lblEstadoSub.AutoEllipsis = false;   // con puntos suspensivos no pasa a la segunda linea
         _lblEstadoSub.BackColor = Color.Transparent;
 
         _btnPrincipal.SetBounds(Ancho - 16 - 132, 21, 132, 34);

@@ -44,3 +44,4 @@ El manual completo, con la configuración recomendada y los problemas frecuentes
 - Código en [`src/`](src): C# con WinForms y .NET 8.
 - Cada cambio en `main` se compila solo en Windows ([Actions](https://github.com/Vilchaco/kerma-hdmi-mirror/actions)).
 - Cómo publicar una versión nueva: [docs/PUBLICAR.md](docs/PUBLICAR.md).
+- Colores, letra y reglas de marca: [docs/MARCA.md](docs/MARCA.md).
