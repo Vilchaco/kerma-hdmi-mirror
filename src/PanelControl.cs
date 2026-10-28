@@ -39,7 +39,7 @@ internal sealed class ItemOrigenAvz
 ///   3. AVANZADO - plegado por defecto: espejo, FPS, origen alternativo,
 ///                 checkboxes, quitar topmost, autoarranque, diagnostico.
 /// </summary>
-internal sealed class PanelControl : Form
+internal sealed partial class PanelControl : Form
 {
     // ---- zona 1: estado ----
     private readonly Panel _tarjeta = new();
@@ -123,8 +123,10 @@ internal sealed class PanelControl : Form
     private static readonly Color ChipAvisoF  = Color.FromArgb(248, 237, 219);
     private static readonly Color ChipAvisoT  = Color.FromArgb(138, 90, 16);
 
-    public PanelControl(bool arranqueAutomatico = false)
+    public PanelControl(bool arranqueAutomatico = false, string carpetaCapturas = null)
     {
+        _carpetaCapturas = carpetaCapturas;
+
         Text = "HdmiMirror";
 
         try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); }
@@ -163,6 +165,18 @@ internal sealed class PanelControl : Form
         _refresco.Start();
 
         CargarListas();
+
+        if (ModoCaptura)
+        {
+            // Solo para las capturas de pantalla de la integracion continua:
+            // ni lee ni guarda la configuracion de la mesa, ni toca el registro.
+            _refresco.Stop();
+            AplicarAjustes(new Ajustes());
+            Shown += async (s, e) => await HacerCapturas();
+            RefrescarEstado();
+            return;
+        }
+
         AplicarAjustes(Ajustes.Cargar());
         RestaurarPosicion();
 
@@ -1224,7 +1238,8 @@ internal sealed class PanelControl : Form
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        GuardarAjustes();
+        if (!ModoCaptura)
+            GuardarAjustes();
 
         Native.UnregisterHotKey(Handle, Native.HOTKEY_PARAR);
         Native.UnregisterHotKey(Handle, Native.HOTKEY_FOCO);
