@@ -65,11 +65,11 @@ internal sealed partial class PanelControl : Form
     private readonly Panel _pnlAvanzado = new();
     private readonly ComboBox _cmbOrigenAvz = new ComboOscuro();
     private readonly ComboBox _cmbEspejo = new ComboOscuro();
-    private readonly NumericUpDown _numFps = new();
-    private readonly CheckBox _chkDevolverFoco = new();
-    private readonly CheckBox _chkOcultar = new();
-    private readonly CheckBox _chkCursor = new();
-    private readonly CheckBox _chkAutoarranque = new();
+    private readonly NumericUpDown _numFps = new NumeroOscuro();
+    private readonly CheckBox _chkDevolverFoco = new CasillaOscura();
+    private readonly CheckBox _chkOcultar = new CasillaOscura();
+    private readonly CheckBox _chkCursor = new CasillaOscura();
+    private readonly CheckBox _chkAutoarranque = new CasillaOscura();
     private readonly Button _btnQuitarTopmost = new();
     private readonly Button _btnDiagnostico = new();
 
@@ -89,8 +89,8 @@ internal sealed partial class PanelControl : Form
     private Ajustes _ajustes = new();
 
     // ---- la reticula ----
-    private const int Ancho = 470;
-    private const int ColumnaEtiqueta = 122;
+    private const int Ancho = 500;
+    private const int ColumnaEtiqueta = 140;   // Sora es mas ancha: con menos, "El supervisor mira" se parte
     private const int AnchoControl = Ancho - ColumnaEtiqueta;
     private const int AltoBoton = 32;
 
@@ -274,7 +274,7 @@ internal sealed partial class PanelControl : Form
 
     private Control ConstruirTarjetaEstado()
     {
-        _tarjeta.Size = new Size(Ancho, 66);
+        _tarjeta.Size = new Size(Ancho, 76);
         _tarjeta.Margin = new Padding(0, 0, 0, 10);
         _tarjeta.Paint += (s, e) =>
         {
@@ -283,30 +283,31 @@ internal sealed partial class PanelControl : Form
             // El estado es este punto: el color lo pone PintarTarjeta en _dot.
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             using var b = new SolidBrush(_dot.ForeColor);
-            e.Graphics.FillEllipse(b, 17, 18, 8, 8);
+            e.Graphics.FillEllipse(b, 17, 19, 8, 8);
         };
 
         _dot.AutoSize = false;
-        _dot.SetBounds(14, 0, 22, 66);
+        _dot.SetBounds(14, 0, 22, 76);
         _dot.Text = "●";
         _dot.Visible = false;   // solo guarda el color; el punto se pinta en la tarjeta
         _dot.TextAlign = ContentAlignment.MiddleLeft;
         _dot.BackColor = Color.Transparent;
 
         _lblEstadoTitulo.AutoSize = false;
-        _lblEstadoTitulo.SetBounds(38, 11, Ancho - 38 - 160, 22);
+        _lblEstadoTitulo.SetBounds(38, 12, Ancho - 38 - 160, 22);
         _lblEstadoTitulo.Font = Marca.SoraSemi(11F);
         _lblEstadoTitulo.ForeColor = Marca.Texto;
         _lblEstadoTitulo.AutoEllipsis = true;
         _lblEstadoTitulo.BackColor = Color.Transparent;
 
         _lblEstadoSub.AutoSize = false;
-        _lblEstadoSub.SetBounds(38, 34, Ancho - 38 - 160, 18);
+        _lblEstadoSub.SetBounds(38, 35, Ancho - 38 - 160, 32);   // hasta dos lineas: los avisos son largos
+        _lblEstadoSub.Font = Marca.Sora(8.5F);
         _lblEstadoSub.ForeColor = TintaSuave;
         _lblEstadoSub.AutoEllipsis = true;
         _lblEstadoSub.BackColor = Color.Transparent;
 
-        _btnPrincipal.SetBounds(Ancho - 16 - 132, 16, 132, 34);
+        _btnPrincipal.SetBounds(Ancho - 16 - 132, 21, 132, 34);
         _btnPrincipal.FlatStyle = FlatStyle.Flat;
         _btnPrincipal.Font = Marca.SoraSemi(9.5F);
         _btnPrincipal.Cursor = Cursors.Hand;
@@ -329,6 +330,7 @@ internal sealed partial class PanelControl : Form
             FlowDirection = FlowDirection.LeftToRight,
             WrapContents = true,
             MinimumSize = new Size(Ancho, 0),
+            MaximumSize = new Size(Ancho, 0),
             Margin = new Padding(0, 0, 0, 14)
         };
 
@@ -364,6 +366,7 @@ internal sealed partial class PanelControl : Form
         // Dealer app + refrescar en la misma fila
         _cmbDealer.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbDealer.Width = AnchoControl - 36;
+        _cmbDealer.Margin = new Padding(0);
         _cmbDealer.SelectedIndexChanged += (s, e) => AlCambiarDealer();
         _pistas.SetToolTip(_cmbDealer,
             "La única decisión de la mesa: esta ventana se captura para el\n" +
@@ -480,6 +483,7 @@ internal sealed partial class PanelControl : Form
 
         _cmbEspejo.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbEspejo.Width = 150;
+        _cmbEspejo.Margin = new Padding(0);
         _cmbEspejo.Items.AddRange(new object[] { "Horizontal", "Vertical", "180 grados", "Sin espejo" });
         _cmbEspejo.SelectedIndex = 0;
 
@@ -488,9 +492,6 @@ internal sealed partial class PanelControl : Form
         _numFps.Value = 20;
         _numFps.Width = 58;
         _numFps.Margin = new Padding(0);
-        _numFps.BackColor = Marca.Superficie;
-        _numFps.ForeColor = Marca.Texto;
-        _numFps.BorderStyle = BorderStyle.FixedSingle;
         _pistas.SetToolTip(_numFps, "Si el ratón va a tirones, baja a 10-15.");
 
         var lblFps = new Label
@@ -523,15 +524,6 @@ internal sealed partial class PanelControl : Form
             "escalonado de la mesa), espera a que exista la dealer app e\n" +
             "inicia el espejo solo, sin clics. No toca el arranque de Windows:\n" +
             "quien lanza la app lo decide el lanzador de la mesa.");
-
-        foreach (var c in new[] { _chkDevolverFoco, _chkOcultar, _chkCursor, _chkAutoarranque })
-        {
-            c.FlatStyle = FlatStyle.Flat;
-            c.FlatAppearance.BorderColor = Marca.Borde;
-            c.FlatAppearance.CheckedBackColor = Marca.Superficie2;
-            c.ForeColor = Marca.Texto;
-            c.Cursor = Cursors.Hand;
-        }
 
         FilaAncha(t, _chkDevolverFoco, 8);
         FilaAncha(t, _chkOcultar, 2);
