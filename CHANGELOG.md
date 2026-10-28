@@ -4,6 +4,21 @@ Todas las versiones de HdmiMirror, de la más reciente a la más antigua. El for
 
 Las versiones anteriores a la 2.1.0 se entregaron sin número y su código no se conservó: sus entradas están reconstruidas para tener referencia, pero no tienen descarga.
 
+## [2.3.0] - 2026-10-28 - Marca Kerma
+
+### Cambiado
+- El panel usa los colores, la letra y el logo del Brandbook Kerma 2026: fondo Black Magic, tarjetas Jambolan y el naranja Honeybell solo en **Iniciar espejo**. La letra es Sora, y Orbitron solo en el nombre de la app. Las fuentes van dentro del exe.
+- El estado se ve con un punto de color, sin rellenos verdes ni textos rojos. Los avisos salen en amarillo.
+- Barra de título oscura, desplegables, casillas y selector de FPS oscuros, y la pantalla de error del espejo con fondo y letra de marca.
+- Icono nuevo con los colores de marca. El manual tiene el mismo estilo.
+
+### Corregido
+- Faltaban tildes en varios textos del panel y en los mensajes de error («Diagnóstico», «escáner», «ratón», «físico», «Atención»…).
+- Etiquetas que se partían en dos líneas y textos de estado que se cortaban.
+
+### A tener en cuenta
+- Solo cambia la parte visual: el espejo, el foco, los clics, la configuración guardada y los atajos funcionan igual que en la 2.2.0.
+
 ## [2.2.0] - 2026-09-22 - El panel recuerda su posición
 
 ### Añadido
