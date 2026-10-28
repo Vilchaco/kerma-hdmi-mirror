@@ -989,7 +989,7 @@ internal sealed partial class PanelControl : Form
         else
         {
             PintarTarjeta(GrisDot, GrisFondo, GrisBorde,
-                "Espejo parado", "Listo para iniciar con la configuración guardada.");
+                "Espejo parado", "Listo para iniciar.");
         }
 
         // ---- boton principal ----
