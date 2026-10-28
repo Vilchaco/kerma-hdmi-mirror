@@ -274,7 +274,7 @@ internal sealed partial class PanelControl : Form
 
     private Control ConstruirTarjetaEstado()
     {
-        _tarjeta.Size = new Size(Ancho, 76);
+        _tarjeta.Size = new Size(Ancho, 82);
         _tarjeta.Margin = new Padding(0, 0, 0, 10);
         _tarjeta.Paint += (s, e) =>
         {
@@ -287,7 +287,7 @@ internal sealed partial class PanelControl : Form
         };
 
         _dot.AutoSize = false;
-        _dot.SetBounds(14, 0, 22, 76);
+        _dot.SetBounds(14, 0, 22, 82);
         _dot.Text = "●";
         _dot.Visible = false;   // solo guarda el color; el punto se pinta en la tarjeta
         _dot.TextAlign = ContentAlignment.MiddleLeft;
@@ -301,13 +301,13 @@ internal sealed partial class PanelControl : Form
         _lblEstadoTitulo.BackColor = Color.Transparent;
 
         _lblEstadoSub.AutoSize = false;
-        _lblEstadoSub.SetBounds(38, 35, Ancho - 38 - 160, 32);   // hasta dos lineas: los avisos son largos
+        _lblEstadoSub.SetBounds(38, 35, Ancho - 38 - 160, 40);   // hasta dos lineas: los avisos son largos
         _lblEstadoSub.Font = Marca.Sora(8.5F);
         _lblEstadoSub.ForeColor = TintaSuave;
         _lblEstadoSub.AutoEllipsis = false;   // con puntos suspensivos no pasa a la segunda linea
         _lblEstadoSub.BackColor = Color.Transparent;
 
-        _btnPrincipal.SetBounds(Ancho - 16 - 132, 21, 132, 34);
+        _btnPrincipal.SetBounds(Ancho - 16 - 132, 24, 132, 34);
         _btnPrincipal.FlatStyle = FlatStyle.Flat;
         _btnPrincipal.Font = Marca.SoraSemi(9.5F);
         _btnPrincipal.Cursor = Cursors.Hand;
