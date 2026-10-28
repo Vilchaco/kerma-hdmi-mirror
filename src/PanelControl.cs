@@ -14,6 +14,8 @@ internal sealed class ItemMonitor
 {
     public string Texto = "";
     public int Indice;
+    public string Dispositivo = "";   // \\.\DISPLAYn de Windows
+    public Rectangle Zona;            // posicion y tamaño en el escritorio
 
     public override string ToString() => Texto;
 }
@@ -24,6 +26,8 @@ internal sealed class ItemOrigenAvz
     public string Texto = "";
     public bool EsDealer;          // true = capturar la ventana de la dealer app
     public int IndiceMonitor = -1; // si no, el monitor completo
+    public string Dispositivo = "";
+    public Rectangle Zona;
 
     public override string ToString() => Texto;
 }
@@ -79,6 +83,9 @@ internal sealed partial class PanelControl : Form
     // ---- infraestructura ----
     private readonly System.Windows.Forms.Timer _autoInicio = new();
     private bool _esperandoAuto;
+    private bool _esperandoPrompter;
+    private DateTime _inicioEsperaPrompter = DateTime.MinValue;
+    private bool _prompterProvisional;   // arrancó en otro porque el guardado no llegó
     private DateTime _avisoHasta = DateTime.MinValue;
 
     private readonly ToolTip _pistas = new();
@@ -383,6 +390,7 @@ internal sealed partial class PanelControl : Form
 
         _cmbPrompter.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbPrompter.Width = AnchoControl;
+        _cmbPrompter.SelectionChangeCommitted += (s, e) => _prompterProvisional = false;
         Fila(t, "Prompter", _cmbPrompter);
 
         // segmentado cristal / panel fisico
@@ -719,7 +727,8 @@ internal sealed partial class PanelControl : Form
     private void CargarListas()
     {
         string dealerAnterior = (_cmbDealer.SelectedItem as ItemVentana)?.Texto ?? "";
-        string origenAnterior = (_cmbOrigenAvz.SelectedItem as ItemOrigenAvz)?.Texto ?? "";
+        var origenAnterior = _cmbOrigenAvz.SelectedItem as ItemOrigenAvz;
+        var prompterAnterior = _cmbPrompter.SelectedItem as ItemMonitor;
 
         _cmbDealer.Items.Clear();
         _cmbPrompter.Items.Clear();
@@ -735,17 +744,78 @@ internal sealed partial class PanelControl : Form
             string nombre = $"Monitor {i + 1} — {p.Bounds.Width}x{p.Bounds.Height}" +
                             (p.Primary ? " (principal)" : "");
 
-            _cmbPrompter.Items.Add(new ItemMonitor { Texto = nombre, Indice = i });
-            _cmbOrigenAvz.Items.Add(new ItemOrigenAvz { Texto = nombre, IndiceMonitor = i });
+            _cmbPrompter.Items.Add(new ItemMonitor { Texto = nombre, Indice = i, Dispositivo = p.DeviceName, Zona = p.Bounds });
+            _cmbOrigenAvz.Items.Add(new ItemOrigenAvz { Texto = nombre, IndiceMonitor = i, Dispositivo = p.DeviceName, Zona = p.Bounds });
         }
 
         foreach (var v in ListarVentanas())
             _cmbDealer.Items.Add(v);
 
         SeleccionarPorTexto(_cmbDealer, dealerAnterior, 0);
-        SeleccionarPorTexto(_cmbOrigenAvz, origenAnterior, 0);
-        if (_cmbPrompter.Items.Count > 0 && _cmbPrompter.SelectedIndex < 0)
-            _cmbPrompter.SelectedIndex = 0;
+
+        // Los monitores se vuelven a elegir por cual es, no por su posicion en
+        // la lista: lo que estaba elegido y, si ya no esta, lo guardado.
+        // Mientras se espera para arrancar solo manda lo guardado: si el
+        // prompter aún no estaba, la primera vuelta habrá elegido otro.
+        int prompter = _esperandoAuto ? PrompterGuardado(pantallas) : -1;
+        if (prompter < 0 && prompterAnterior != null)
+            prompter = BuscarMonitor(pantallas, prompterAnterior.Dispositivo, prompterAnterior.Zona, -1);
+        if (prompter < 0)
+            prompter = PrompterGuardado(pantallas);
+        if (_cmbPrompter.Items.Count > 0)
+            _cmbPrompter.SelectedIndex = prompter >= 0 ? prompter : 0;
+
+        if (origenAnterior == null || origenAnterior.EsDealer)
+            _cmbOrigenAvz.SelectedIndex = 0;
+        else
+        {
+            int origen = BuscarMonitor(pantallas, origenAnterior.Dispositivo, origenAnterior.Zona, -1);
+            _cmbOrigenAvz.SelectedIndex = origen >= 0 ? origen + 1 : 0;
+        }
+    }
+
+    /// <summary>
+    /// Busca un monitor guardado entre los que hay ahora. Windows puede
+    /// cambiar el orden de la lista al reiniciar, o cuando aparecen y
+    /// desaparecen los monitores virtuales de RustDesk, así que se busca
+    /// primero por su sitio en el escritorio, luego por su nombre de
+    /// dispositivo y solo al final por el número que tenía. -1 = no está.
+    /// </summary>
+    private static int BuscarMonitor(Screen[] pantallas, string dispositivo, Rectangle zona, int indice)
+    {
+        if (!zona.IsEmpty)
+        {
+            for (int i = 0; i < pantallas.Length; i++)
+                if (pantallas[i].Bounds == zona && pantallas[i].DeviceName == dispositivo)
+                    return i;
+            for (int i = 0; i < pantallas.Length; i++)
+                if (pantallas[i].Bounds == zona)
+                    return i;
+        }
+
+        if (!string.IsNullOrEmpty(dispositivo))
+        {
+            for (int i = 0; i < pantallas.Length; i++)
+                if (pantallas[i].DeviceName == dispositivo)
+                    return i;
+        }
+
+        return indice >= 0 && indice < pantallas.Length ? indice : -1;
+    }
+
+    private int PrompterGuardado(Screen[] pantallas) =>
+        BuscarMonitor(pantallas, _ajustes.PrompterDispositivo, Ajustes.LeerZona(_ajustes.PrompterZona), _ajustes.MonitorSalida);
+
+    /// <summary>
+    /// Si se guardó qué monitor es el prompter, ¿está conectado ya? Al
+    /// arrancar la mesa el HDMI del prompter puede tardar en aparecer.
+    /// </summary>
+    private bool PrompterGuardadoConectado()
+    {
+        var zona = Ajustes.LeerZona(_ajustes.PrompterZona);
+        if (zona.IsEmpty && string.IsNullOrEmpty(_ajustes.PrompterDispositivo))
+            return true;   // configuración antigua: solo hay número, no se espera
+        return BuscarMonitor(Screen.AllScreens, _ajustes.PrompterDispositivo, zona, -1) >= 0;
     }
 
     private static void SeleccionarPorTexto(ComboBox combo, string texto, int porDefecto)
@@ -886,12 +956,16 @@ internal sealed partial class PanelControl : Form
         if (!string.IsNullOrEmpty(dealer) && dealer != "(ninguna)")
             SeleccionarExacto(_cmbDealer, dealer);
 
-        if (a.MonitorSalida >= 0 && a.MonitorSalida < _cmbPrompter.Items.Count)
-            _cmbPrompter.SelectedIndex = a.MonitorSalida;
+        var pantallas = Screen.AllScreens;
+        int prompter = PrompterGuardado(pantallas);
+        if (prompter >= 0 && prompter < _cmbPrompter.Items.Count)
+            _cmbPrompter.SelectedIndex = prompter;
 
         // origen avanzado: monitor guardado, o la dealer app (indice 0)
-        if (a.MonitorOrigen >= 0 && a.MonitorOrigen + 1 < _cmbOrigenAvz.Items.Count)
-            _cmbOrigenAvz.SelectedIndex = a.MonitorOrigen + 1;
+        int origen = a.MonitorOrigen < 0 ? -1
+            : BuscarMonitor(pantallas, a.OrigenDispositivo, Ajustes.LeerZona(a.OrigenZona), a.MonitorOrigen);
+        if (origen >= 0 && origen + 1 < _cmbOrigenAvz.Items.Count)
+            _cmbOrigenAvz.SelectedIndex = origen + 1;
         else
             _cmbOrigenAvz.SelectedIndex = 0;
 
@@ -926,7 +1000,16 @@ internal sealed partial class PanelControl : Form
             ? "Ventana: " + dealer
             : "";
         _ajustes.MonitorOrigen = origenEsDealer ? -1 : origenAvz.IndiceMonitor;
-        _ajustes.MonitorSalida = _cmbPrompter.SelectedIndex;
+        _ajustes.OrigenDispositivo = origenEsDealer ? "" : origenAvz.Dispositivo;
+        _ajustes.OrigenZona = origenEsDealer ? "" : Ajustes.EscribirZona(origenAvz.Zona);
+        // Si arrancó solo en otro monitor porque el del prompter no apareció,
+        // no se pisa lo guardado: al siguiente reinicio se vuelve a buscar.
+        if (!_prompterProvisional && _cmbPrompter.SelectedItem is ItemMonitor prompter)
+        {
+            _ajustes.MonitorSalida = prompter.Indice;
+            _ajustes.PrompterDispositivo = prompter.Dispositivo;
+            _ajustes.PrompterZona = Ajustes.EscribirZona(prompter.Zona);
+        }
         _ajustes.Espejo = _cmbEspejo.SelectedIndex;
         _ajustes.Fps = (int)_numFps.Value;
         _ajustes.OcultarDeCapturas = _chkOcultar.Checked;
@@ -970,7 +1053,13 @@ internal sealed partial class PanelControl : Form
         }
 
         // ---- tarjeta ----
-        if (!enMarcha && _esperandoAuto)
+        if (!enMarcha && _esperandoAuto && _esperandoPrompter)
+        {
+            PintarTarjeta(AmbarTexto, AmbarFondo, AmbarBorde,
+                "Esperando al monitor del prompter...",
+                "El espejo se iniciará solo en cuanto Windows lo detecte.");
+        }
+        else if (!enMarcha && _esperandoAuto)
         {
             PintarTarjeta(AmbarTexto, AmbarFondo, AmbarBorde,
                 "Esperando a la dealer app...",
@@ -1271,6 +1360,21 @@ internal sealed partial class PanelControl : Form
 
         if (!dealerOk)
             return;   // aun no esta; el timer reintenta en 3 s
+
+        // El monitor del prompter tambien puede llegar tarde. Se espera hasta
+        // un minuto; si no aparece, se arranca con el que haya, como antes.
+        if (!PrompterGuardadoConectado())
+        {
+            if (_inicioEsperaPrompter == DateTime.MinValue)
+                _inicioEsperaPrompter = DateTime.Now;
+            if (DateTime.Now - _inicioEsperaPrompter < TimeSpan.FromSeconds(60))
+            {
+                _esperandoPrompter = true;
+                return;
+            }
+            _prompterProvisional = true;
+        }
+        _esperandoPrompter = false;
 
         _autoInicio.Stop();
         _esperandoAuto = false;

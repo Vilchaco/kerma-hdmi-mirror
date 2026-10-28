@@ -14,6 +14,15 @@ internal sealed class Ajustes
     public string TituloOrigen { get; set; } = "";
     public int MonitorOrigen { get; set; } = -1;
     public int MonitorSalida { get; set; }
+
+    /// <summary>
+    /// Qué monitor es, además de su número: el número cambia si Windows
+    /// reordena la lista al reiniciar. Zona = "x,y,ancho,alto" en el escritorio.
+    /// </summary>
+    public string PrompterDispositivo { get; set; } = "";
+    public string PrompterZona { get; set; } = "";
+    public string OrigenDispositivo { get; set; } = "";
+    public string OrigenZona { get; set; } = "";
     public int Espejo { get; set; }
     public int Fps { get; set; } = 20;
     public bool OcultarDeCapturas { get; set; } = true;
@@ -33,6 +42,19 @@ internal sealed class Ajustes
     public int? PanelX { get; set; }
     public int? PanelY { get; set; }
     public bool AvanzadoAbierto { get; set; }
+
+    public static string EscribirZona(Rectangle r) =>
+        r.IsEmpty ? "" : $"{r.X},{r.Y},{r.Width},{r.Height}";
+
+    public static Rectangle LeerZona(string texto)
+    {
+        var partes = (texto ?? "").Split(',');
+        if (partes.Length == 4 &&
+            int.TryParse(partes[0], out int x) && int.TryParse(partes[1], out int y) &&
+            int.TryParse(partes[2], out int w) && int.TryParse(partes[3], out int h))
+            return new Rectangle(x, y, w, h);
+        return Rectangle.Empty;
+    }
 
     private static string Ruta =>
         Path.Combine(AppContext.BaseDirectory, "hdmimirror.config.json");
