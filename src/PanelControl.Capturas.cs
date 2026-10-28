@@ -24,6 +24,9 @@ internal sealed partial class PanelControl
             TopMost = true;
             Activate();
 
+            // Raton lejos del panel para que no salgan tooltips en las capturas
+            Cursor.Position = new Point(Screen.PrimaryScreen.Bounds.Width - 2, Screen.PrimaryScreen.Bounds.Height - 2);
+
             // 1. Estado inicial, tal cual arranca en una mesa sin configurar
             await Capturar("1-parado");
 
@@ -35,6 +38,22 @@ internal sealed partial class PanelControl
             // 3. Un aviso (lo que sale si se pulsa Iniciar sin dealer app)
             MostrarAviso("Elige la dealer app (o un monitor en Ajustes avanzados).");
             await Capturar("3-aviso");
+
+            // 4 y 5. Espejo en marcha y sin imagen. Solo se pinta el estado con
+            // los mismos metodos que usa la app; el espejo no se arranca.
+            PintarTarjeta(VerdeDot, VerdeFondo, VerdeBorde, "Espejo en marcha",
+                "Dealer Control → monitor 1 · horizontal · clics directos");
+            EstiloBotonPrincipal(true);
+            _chipCaptura.Visible = true;
+            PintarChip(_chipCaptura, "Captura OK", ChipOkF, ChipOkT);
+            PintarChip(_chipFoco, "Foco devuelto 3 veces", ChipOkF, ChipOkT);
+            await Capturar("4-en-marcha");
+
+            PintarTarjeta(RojoTexto, RojoFondo, RojoBorde, "Espejo en marcha — sin imagen",
+                "La ventana de origen ya no existe o está oculta.");
+            PintarChip(_chipCaptura, "Captura SIN IMAGEN", ChipMalF, ChipMalT);
+            PintarChip(_chipFoco, "Foco: reintentando cada 10 s", ChipAvisoF, ChipAvisoT);
+            await Capturar("5-sin-imagen");
         }
         catch (Exception ex)
         {

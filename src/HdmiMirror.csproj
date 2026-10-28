@@ -20,4 +20,10 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
+  <!-- Marca de Kerma (brandbook): letras y logo viajan dentro del exe.
+       En los PCs de mesa no estan instaladas Sora ni Orbitron. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Marca\*.ttf;Marca\*.png" LogicalName="HdmiMirror.Marca.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

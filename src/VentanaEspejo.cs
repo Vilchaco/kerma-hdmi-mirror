@@ -183,7 +183,7 @@ internal sealed class VentanaEspejo : Form
         {
             _raton.Dispose();
             _raton = null;
-            ErrorRaton = "No se pudo instalar el hook de raton. " +
+            ErrorRaton = "No se pudo instalar el hook de ratón. " +
                          "Prueba a ejecutar HdmiMirror como administrador.";
         }
     }
@@ -304,9 +304,10 @@ internal sealed class VentanaEspejo : Form
         try
         {
             using var g = CreateGraphics();
-            g.Clear(Color.Black);
+            g.Clear(Marca.Fondo);
 
-            using var fuente = new Font("Segoe UI", 16F);
+            using var fuente = Marca.Sora(16F);
+            using var tinta = new SolidBrush(Marca.Texto);
             var zona = new RectangleF(60, 60, ClientSize.Width - 120, ClientSize.Height - 120);
             using var formato = new StringFormat
             {
@@ -315,8 +316,8 @@ internal sealed class VentanaEspejo : Form
             };
 
             g.DrawString("HdmiMirror — sin imagen\n\n" + mensaje +
-                         "\n\nCtrl+Alt+M para el espejo · Ctrl+Alt+D diagnostico",
-                         fuente, Brushes.White, zona, formato);
+                         "\n\nCtrl+Alt+M para el espejo · Ctrl+Alt+D diagnóstico",
+                         fuente, tinta, zona, formato);
         }
         catch
         {

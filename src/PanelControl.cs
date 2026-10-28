@@ -47,15 +47,15 @@ internal sealed partial class PanelControl : Form
     private readonly Label _lblEstadoTitulo = new();
     private readonly Label _lblEstadoSub = new();
     private readonly Button _btnPrincipal = new();
-    private readonly Label _chipCaptura = new();
-    private readonly Label _chipFoco = new();
-    private readonly Label _chipAuto = new();
+    private readonly Chip _chipCaptura = new();
+    private readonly Chip _chipFoco = new();
+    private readonly Chip _chipAuto = new();
     private Color _bordeTarjeta;
 
     // ---- zona 2: mesa ----
-    private readonly ComboBox _cmbDealer = new();
+    private readonly ComboBox _cmbDealer = new ComboOscuro();
     private readonly Button _btnRefrescar = new();
-    private readonly ComboBox _cmbPrompter = new();
+    private readonly ComboBox _cmbPrompter = new ComboOscuro();
     private readonly Button _btnCristal = new();
     private readonly Button _btnPanelF = new();
     private bool _mirarPanel;   // false = cristal (clics directos), true = panel fisico (recolocados)
@@ -63,8 +63,8 @@ internal sealed partial class PanelControl : Form
     // ---- zona 3: avanzado ----
     private readonly Button _btnAvanzado = new();
     private readonly Panel _pnlAvanzado = new();
-    private readonly ComboBox _cmbOrigenAvz = new();
-    private readonly ComboBox _cmbEspejo = new();
+    private readonly ComboBox _cmbOrigenAvz = new ComboOscuro();
+    private readonly ComboBox _cmbEspejo = new ComboOscuro();
     private readonly NumericUpDown _numFps = new();
     private readonly CheckBox _chkDevolverFoco = new();
     private readonly CheckBox _chkOcultar = new();
@@ -94,34 +94,36 @@ internal sealed partial class PanelControl : Form
     private const int AnchoControl = Ancho - ColumnaEtiqueta;
     private const int AltoBoton = 32;
 
-    // ---- paleta (aprobada en la propuesta de rediseño) ----
-    private static readonly Color Indigo      = Color.FromArgb(42, 29, 99);      // #2A1D63
-    private static readonly Color Tinta       = Color.FromArgb(26, 26, 31);
-    private static readonly Color TintaSuave  = Color.FromArgb(85, 81, 106);
-    private static readonly Color GrisTexto   = Color.FromArgb(139, 135, 160);
-    private static readonly Color LineaCombo  = Color.FromArgb(201, 199, 212);
+    // ---- colores: todos salen de Marca (brandbook). Los nombres dicen para que
+    //      se usan. La tarjeta tiene siempre la misma superficie: el estado se
+    //      lee en el punto de color, nunca en rellenos verdes o rojos. ----
+    private static readonly Color Tinta       = Marca.Mut;    // etiquetas de campo
+    private static readonly Color TintaSuave  = Marca.Mut;    // textos secundarios
+    private static readonly Color GrisTexto   = Marca.Mut2;   // pie, FPS
+    private static readonly Color LineaCombo  = Marca.Borde;
 
-    private static readonly Color VerdeDot    = Color.FromArgb(30, 138, 94);
-    private static readonly Color VerdeFondo  = Color.FromArgb(237, 248, 242);
-    private static readonly Color VerdeBorde  = Color.FromArgb(191, 227, 210);
-    private static readonly Color RojoTexto   = Color.FromArgb(178, 72, 61);
-    private static readonly Color RojoFondo   = Color.FromArgb(251, 240, 238);
-    private static readonly Color RojoBorde   = Color.FromArgb(239, 199, 193);
-    private static readonly Color AmbarTexto  = Color.FromArgb(199, 126, 29);
-    private static readonly Color AmbarFondo  = Color.FromArgb(248, 237, 219);
-    private static readonly Color AmbarBorde  = Color.FromArgb(233, 212, 175);
-    private static readonly Color GrisDot     = Color.FromArgb(155, 151, 171);
-    private static readonly Color GrisFondo   = Color.FromArgb(246, 245, 249);
-    private static readonly Color GrisBorde   = Color.FromArgb(226, 224, 234);
+    private static readonly Color VerdeDot    = Marca.Ok;
+    private static readonly Color VerdeFondo  = Marca.Superficie;
+    private static readonly Color VerdeBorde  = Marca.Borde;
+    private static readonly Color RojoTexto   = Marca.Mal;
+    private static readonly Color RojoFondo   = Marca.Superficie;
+    private static readonly Color RojoBorde   = Marca.Borde;
+    private static readonly Color AmbarTexto  = Marca.Aviso;
+    private static readonly Color AmbarFondo  = Marca.Superficie;
+    private static readonly Color AmbarBorde  = Marca.Borde;
+    private static readonly Color GrisDot     = Marca.Mut2;
+    private static readonly Color GrisFondo   = Marca.Superficie;
+    private static readonly Color GrisBorde   = Marca.Borde;
 
-    private static readonly Color ChipNeutroF = Color.FromArgb(239, 237, 245);
-    private static readonly Color ChipNeutroT = Color.FromArgb(85, 81, 106);
-    private static readonly Color ChipOkF     = Color.FromArgb(225, 243, 234);
-    private static readonly Color ChipOkT     = Color.FromArgb(20, 104, 74);
-    private static readonly Color ChipMalF    = Color.FromArgb(249, 228, 225);
-    private static readonly Color ChipMalT    = Color.FromArgb(147, 56, 46);
-    private static readonly Color ChipAvisoF  = Color.FromArgb(248, 237, 219);
-    private static readonly Color ChipAvisoT  = Color.FromArgb(138, 90, 16);
+    // chips: fondo neutro siempre; el segundo color es el del punto
+    private static readonly Color ChipNeutroF = Marca.Superficie2;
+    private static readonly Color ChipNeutroT = Marca.Mut2;
+    private static readonly Color ChipOkF     = Marca.Superficie2;
+    private static readonly Color ChipOkT     = Marca.Ok;
+    private static readonly Color ChipMalF    = Marca.Superficie2;
+    private static readonly Color ChipMalT    = Marca.Mal;
+    private static readonly Color ChipAvisoF  = Marca.Superficie2;
+    private static readonly Color ChipAvisoT  = Marca.Aviso;
 
     public PanelControl(bool arranqueAutomatico = false, string carpetaCapturas = null)
     {
@@ -138,8 +140,9 @@ internal sealed partial class PanelControl : Form
         AutoScaleMode = AutoScaleMode.Font;
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        Font = new Font("Segoe UI", 9F);
-        BackColor = Color.FromArgb(251, 251, 252);
+        Font = Marca.Sora(9F);
+        BackColor = Marca.Fondo;
+        ForeColor = Marca.Texto;
 
         var raiz = new FlowLayoutPanel
         {
@@ -151,6 +154,7 @@ internal sealed partial class PanelControl : Form
             Padding = new Padding(24, 18, 24, 14)
         };
 
+        raiz.Controls.Add(ConstruirMarca());
         raiz.Controls.Add(ConstruirTarjetaEstado());
         raiz.Controls.Add(ConstruirChips());
         raiz.Controls.Add(ConstruirMesa());
@@ -228,6 +232,44 @@ internal sealed partial class PanelControl : Form
         Location = new Point(x, y);
     }
 
+    // ================================================================ marca
+
+    /// <summary>Logo de Kerma y nombre de la app en Orbitron (solo aqui).</summary>
+    private Control ConstruirMarca()
+    {
+        var fila = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            Margin = new Padding(0, 0, 0, 14)
+        };
+
+        var logo = Marca.Logo();
+        if (logo != null)
+        {
+            fila.Controls.Add(new PictureBox
+            {
+                Image = logo,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Size = new Size(60, 26),
+                Margin = new Padding(0, 0, 12, 0)
+            });
+        }
+
+        fila.Controls.Add(new Label
+        {
+            Text = "HDMI MIRROR",
+            AutoSize = true,
+            Font = Marca.Orbitron(10F),
+            ForeColor = Marca.Mut,
+            Margin = new Padding(0, 6, 0, 0)
+        });
+
+        return fila;
+    }
+
     // =============================================================== zona 1
 
     private Control ConstruirTarjetaEstado()
@@ -235,18 +277,26 @@ internal sealed partial class PanelControl : Form
         _tarjeta.Size = new Size(Ancho, 66);
         _tarjeta.Margin = new Padding(0, 0, 0, 10);
         _tarjeta.Paint += (s, e) =>
+        {
             ControlPaint.DrawBorder(e.Graphics, _tarjeta.ClientRectangle, _bordeTarjeta, ButtonBorderStyle.Solid);
+
+            // El estado es este punto: el color lo pone PintarTarjeta en _dot.
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var b = new SolidBrush(_dot.ForeColor);
+            e.Graphics.FillEllipse(b, 17, 18, 8, 8);
+        };
 
         _dot.AutoSize = false;
         _dot.SetBounds(14, 0, 22, 66);
         _dot.Text = "●";
-        _dot.Font = new Font(Font.FontFamily, 12F);
+        _dot.Visible = false;   // solo guarda el color; el punto se pinta en la tarjeta
         _dot.TextAlign = ContentAlignment.MiddleLeft;
         _dot.BackColor = Color.Transparent;
 
         _lblEstadoTitulo.AutoSize = false;
         _lblEstadoTitulo.SetBounds(38, 11, Ancho - 38 - 160, 22);
-        _lblEstadoTitulo.Font = new Font(Font.FontFamily, 11F, FontStyle.Bold);
+        _lblEstadoTitulo.Font = Marca.SoraSemi(11F);
+        _lblEstadoTitulo.ForeColor = Marca.Texto;
         _lblEstadoTitulo.AutoEllipsis = true;
         _lblEstadoTitulo.BackColor = Color.Transparent;
 
@@ -258,7 +308,8 @@ internal sealed partial class PanelControl : Form
 
         _btnPrincipal.SetBounds(Ancho - 16 - 132, 16, 132, 34);
         _btnPrincipal.FlatStyle = FlatStyle.Flat;
-        _btnPrincipal.Font = new Font(Font, FontStyle.Bold);
+        _btnPrincipal.Font = Marca.SoraSemi(9.5F);
+        _btnPrincipal.Cursor = Cursors.Hand;
         _btnPrincipal.Click += (s, e) => AlternarEspejo();
 
         _tarjeta.Controls.Add(_dot);
@@ -286,7 +337,7 @@ internal sealed partial class PanelControl : Form
             chip.AutoSize = true;
             chip.Padding = new Padding(9, 3, 9, 4);
             chip.Margin = new Padding(0, 0, 6, 0);
-            chip.Font = new Font(Font.FontFamily, 8F);
+            chip.Font = Marca.Sora(8F);
             fila.Controls.Add(chip);
         }
 
@@ -308,20 +359,19 @@ internal sealed partial class PanelControl : Form
         t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, ColumnaEtiqueta));
         t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, AnchoControl));
 
-        Cabecera(t, "MESA");
+        Cabecera(t, "Mesa");
 
         // Dealer app + refrescar en la misma fila
         _cmbDealer.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbDealer.Width = AnchoControl - 36;
-        _cmbDealer.FlatStyle = FlatStyle.System;
         _cmbDealer.SelectedIndexChanged += (s, e) => AlCambiarDealer();
         _pistas.SetToolTip(_cmbDealer,
-            "La unica decision de la mesa: esta ventana se captura para el\n" +
-            "espejo Y recibe el foco para el escaner. Una sola eleccion.");
+            "La única decisión de la mesa: esta ventana se captura para el\n" +
+            "espejo y recibe el foco para el escáner. Una sola elección.");
 
-        _btnRefrescar.Size = new Size(30, 27);
         _btnRefrescar.Text = "⟳";
-        _btnRefrescar.FlatStyle = FlatStyle.System;
+        BotonSecundario(_btnRefrescar, 30);
+        _btnRefrescar.Height = _cmbDealer.Height;
         _btnRefrescar.Margin = new Padding(6, 0, 0, 0);
         _btnRefrescar.Click += (s, e) => CargarListas();
         _pistas.SetToolTip(_btnRefrescar, "Volver a buscar ventanas y monitores");
@@ -330,12 +380,11 @@ internal sealed partial class PanelControl : Form
 
         _cmbPrompter.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbPrompter.Width = AnchoControl;
-        _cmbPrompter.FlatStyle = FlatStyle.System;
         Fila(t, "Prompter", _cmbPrompter);
 
         // segmentado cristal / panel fisico
         _btnCristal.Text = "El cristal";
-        _btnPanelF.Text = "El panel fisico";
+        _btnPanelF.Text = "El panel físico";
         foreach (var b in new[] { _btnCristal, _btnPanelF })
         {
             b.Size = new Size(AnchoControl / 2, 29);
@@ -343,11 +392,13 @@ internal sealed partial class PanelControl : Form
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderColor = LineaCombo;
             b.FlatAppearance.BorderSize = 1;
+            b.FlatAppearance.MouseOverBackColor = Marca.Superficie2Hover;
+            b.Cursor = Cursors.Hand;
         }
         _btnCristal.Click += (s, e) => { _mirarPanel = false; PintarSegmento(); };
         _btnPanelF.Click += (s, e) => { _mirarPanel = true; PintarSegmento(); };
         _pistas.SetToolTip(_btnCristal, "El reflejo re-invierte la imagen: los clics pasan directos.");
-        _pistas.SetToolTip(_btnPanelF, "En el panel todo se ve al reves: los clics se recolocan espejados.");
+        _pistas.SetToolTip(_btnPanelF, "En el panel todo se ve al revés: los clics se recolocan espejados.");
         PintarSegmento();
 
         Fila(t, "El supervisor mira", Horizontal(_btnCristal, _btnPanelF));
@@ -363,9 +414,11 @@ internal sealed partial class PanelControl : Form
 
     private void EstiloSegmento(Button b, bool activo)
     {
-        b.BackColor = activo ? Indigo : Color.White;
-        b.ForeColor = activo ? Color.White : TintaSuave;
-        b.Font = activo ? new Font(Font, FontStyle.Bold) : Font;
+        // Seleccionado = superficie alta y texto blanco. Sin naranja: el unico
+        // elemento de acento de la pantalla es "Iniciar espejo".
+        b.BackColor = activo ? Marca.Superficie2 : Marca.Superficie;
+        b.ForeColor = activo ? Marca.Texto : Marca.Mut;
+        b.Font = activo ? Marca.SoraSemi(9F) : Font;
     }
 
     // =============================================================== zona 3
@@ -375,9 +428,11 @@ internal sealed partial class PanelControl : Form
         _btnAvanzado.Size = new Size(Ancho, 32);
         _btnAvanzado.Margin = new Padding(0, 14, 0, 0);
         _btnAvanzado.FlatStyle = FlatStyle.Flat;
-        _btnAvanzado.FlatAppearance.BorderColor = GrisBorde;
-        _btnAvanzado.BackColor = GrisFondo;
-        _btnAvanzado.ForeColor = TintaSuave;
+        _btnAvanzado.FlatAppearance.BorderColor = Marca.Borde;
+        _btnAvanzado.FlatAppearance.MouseOverBackColor = Marca.Superficie2;
+        _btnAvanzado.BackColor = Marca.Superficie;
+        _btnAvanzado.ForeColor = Marca.Mut;
+        _btnAvanzado.Cursor = Cursors.Hand;
         _btnAvanzado.TextAlign = ContentAlignment.MiddleLeft;
         _btnAvanzado.Padding = new Padding(8, 0, 0, 0);
         _btnAvanzado.Text = "▼  Ajustes avanzados";
@@ -409,24 +464,22 @@ internal sealed partial class PanelControl : Form
             ColumnCount = 2,
             Location = new Point(0, 0),
             Margin = new Padding(0),
-            Padding = new Padding(10, 8, 0, 4),
+            Padding = new Padding(0, 8, 0, 4),
             GrowStyle = TableLayoutPanelGrowStyle.AddRows
         };
-        t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, ColumnaEtiqueta - 10));
+        t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, ColumnaEtiqueta));
         t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, AnchoControl));
 
         _cmbOrigenAvz.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbOrigenAvz.Width = AnchoControl;
-        _cmbOrigenAvz.FlatStyle = FlatStyle.System;
         _pistas.SetToolTip(_cmbOrigenAvz,
-            "Que se captura para el espejo. Por defecto, la ventana de la\n" +
+            "Qué se captura para el espejo. Por defecto, la ventana de la\n" +
             "dealer app (sigue funcionando aunque la tapen). Monitor completo\n" +
             "espeja todo lo que se vea en esa pantalla.");
         Fila(t, "Origen de imagen", _cmbOrigenAvz);
 
         _cmbEspejo.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbEspejo.Width = 150;
-        _cmbEspejo.FlatStyle = FlatStyle.System;
         _cmbEspejo.Items.AddRange(new object[] { "Horizontal", "Vertical", "180 grados", "Sin espejo" });
         _cmbEspejo.SelectedIndex = 0;
 
@@ -435,7 +488,10 @@ internal sealed partial class PanelControl : Form
         _numFps.Value = 20;
         _numFps.Width = 58;
         _numFps.Margin = new Padding(0);
-        _pistas.SetToolTip(_numFps, "Si el raton va a tirones, baja a 10-15.");
+        _numFps.BackColor = Marca.Superficie;
+        _numFps.ForeColor = Marca.Texto;
+        _numFps.BorderStyle = BorderStyle.FixedSingle;
+        _pistas.SetToolTip(_numFps, "Si el ratón va a tirones, baja a 10-15.");
 
         var lblFps = new Label
         {
@@ -446,7 +502,7 @@ internal sealed partial class PanelControl : Form
         };
         Fila(t, "Espejo", Horizontal(_cmbEspejo, lblFps, _numFps));
 
-        _chkDevolverFoco.Text = "Devolver el foco a la dealer app (escaner)";
+        _chkDevolverFoco.Text = "Devolver el foco a la dealer app (escáner)";
         _chkDevolverFoco.AutoSize = true;
         _chkDevolverFoco.Checked = true;
         _chkDevolverFoco.CheckedChanged += (s, e) => AlternarVigilante();
@@ -455,7 +511,7 @@ internal sealed partial class PanelControl : Form
         _chkOcultar.AutoSize = true;
         _chkOcultar.Checked = true;
 
-        _chkCursor.Text = "Dibujar el cursor del raton";
+        _chkCursor.Text = "Dibujar el cursor del ratón";
         _chkCursor.AutoSize = true;
         _chkCursor.Checked = true;
 
@@ -468,6 +524,15 @@ internal sealed partial class PanelControl : Form
             "inicia el espejo solo, sin clics. No toca el arranque de Windows:\n" +
             "quien lanza la app lo decide el lanzador de la mesa.");
 
+        foreach (var c in new[] { _chkDevolverFoco, _chkOcultar, _chkCursor, _chkAutoarranque })
+        {
+            c.FlatStyle = FlatStyle.Flat;
+            c.FlatAppearance.BorderColor = Marca.Borde;
+            c.FlatAppearance.CheckedBackColor = Marca.Superficie2;
+            c.ForeColor = Marca.Texto;
+            c.Cursor = Cursors.Hand;
+        }
+
         FilaAncha(t, _chkDevolverFoco, 8);
         FilaAncha(t, _chkOcultar, 2);
         FilaAncha(t, _chkCursor, 2);
@@ -478,9 +543,9 @@ internal sealed partial class PanelControl : Form
         _btnQuitarTopmost.Click += (s, e) => QuitarTopmost();
         _pistas.SetToolTip(_btnQuitarTopmost,
             "Con el foco garantizado, la dealer app ya no necesita estar\n" +
-            "always-on-top; quitarselo evita peleas con el espejo.");
+            "always-on-top; quitárselo evita peleas con el espejo.");
 
-        _btnDiagnostico.Text = "Diagnostico";
+        _btnDiagnostico.Text = "Diagnóstico";
         BotonSecundario(_btnDiagnostico, 116);
         _btnDiagnostico.Margin = new Padding(8, 0, 0, 0);
         _btnDiagnostico.Click += (s, e) => LanzarDiagnostico();
@@ -509,10 +574,10 @@ internal sealed partial class PanelControl : Form
 
         var atajos = new Label
         {
-            Text = "Ctrl+Alt+M parar   ·   Ctrl+Alt+F foco   ·   Ctrl+Alt+D diagnostico",
+            Text = "Ctrl+Alt+M parar   ·   Ctrl+Alt+F foco   ·   Ctrl+Alt+D diagnóstico",
             AutoSize = true,
             ForeColor = GrisTexto,
-            Font = new Font(Font.FontFamily, 8F),
+            Font = Marca.Sora(8F),
             Margin = new Padding(0, 2, 0, 0)
         };
 
@@ -522,7 +587,7 @@ internal sealed partial class PanelControl : Form
             Text = "v" + Application.ProductVersion.Split('+')[0],
             AutoSize = true,
             ForeColor = GrisTexto,
-            Font = new Font(Font.FontFamily, 8F),
+            Font = Marca.Sora(8F),
             Margin = new Padding(0, 2, 0, 0)
         };
 
@@ -543,8 +608,8 @@ internal sealed partial class PanelControl : Form
         {
             Text = texto,
             AutoSize = true,
-            Font = new Font(Font.FontFamily, 8F, FontStyle.Bold),
-            ForeColor = GrisTexto,
+            Font = Marca.SoraSemi(9F),
+            ForeColor = Marca.Texto,
             Margin = new Padding(0, 0, 0, 4)
         };
 
@@ -600,15 +665,23 @@ internal sealed partial class PanelControl : Form
     {
         b.AutoSize = false;
         b.Size = new Size(ancho, AltoBoton - 4);
-        b.FlatStyle = FlatStyle.System;
+        b.FlatStyle = FlatStyle.Flat;
+        b.BackColor = Marca.Superficie2;
+        b.ForeColor = Marca.Texto;
+        b.FlatAppearance.BorderColor = Marca.Borde;
+        b.FlatAppearance.MouseOverBackColor = Marca.Superficie2Hover;
+        b.FlatAppearance.MouseDownBackColor = Marca.Borde;
+        b.Cursor = Cursors.Hand;
         b.Margin = new Padding(0);
     }
 
-    private void PintarChip(Label chip, string texto, Color fondo, Color tinta)
+    private void PintarChip(Chip chip, string texto, Color fondo, Color punto)
     {
         chip.Text = texto;
         chip.BackColor = fondo;
-        chip.ForeColor = tinta;
+        chip.ColorPunto = punto;
+        chip.ForeColor = Marca.Mut;
+        chip.Invalidate();
     }
 
     // ---------------------------------------------------------------- atajos
@@ -616,6 +689,7 @@ internal sealed partial class PanelControl : Form
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
+        Marca.BarraDeTitulo(Handle);
         Native.RegisterHotKey(Handle, Native.HOTKEY_PARAR, Native.MOD_CONTROL | Native.MOD_ALT, (uint)Keys.M);
         Native.RegisterHotKey(Handle, Native.HOTKEY_FOCO,  Native.MOD_CONTROL | Native.MOD_ALT, (uint)Keys.F);
         Native.RegisterHotKey(Handle, Native.HOTKEY_DIAG,  Native.MOD_CONTROL | Native.MOD_ALT, (uint)Keys.D);
@@ -908,7 +982,7 @@ internal sealed partial class PanelControl : Form
         {
             PintarTarjeta(AmbarTexto, AmbarFondo, AmbarBorde,
                 "Esperando a la dealer app...",
-                "El espejo se iniciara solo en cuanto aparezca.");
+                "El espejo se iniciará solo en cuanto aparezca.");
         }
         else if (enMarcha && !string.IsNullOrEmpty(_espejo.EstadoCaptura))
         {
@@ -923,25 +997,11 @@ internal sealed partial class PanelControl : Form
         else
         {
             PintarTarjeta(GrisDot, GrisFondo, GrisBorde,
-                "Espejo parado", "Listo para iniciar con la configuracion guardada.");
+                "Espejo parado", "Listo para iniciar con la configuración guardada.");
         }
 
         // ---- boton principal ----
-        if (enMarcha)
-        {
-            _btnPrincipal.Text = "Parar";
-            _btnPrincipal.BackColor = Color.White;
-            _btnPrincipal.ForeColor = RojoTexto;
-            _btnPrincipal.FlatAppearance.BorderColor = RojoBorde;
-            _btnPrincipal.FlatAppearance.BorderSize = 1;
-        }
-        else
-        {
-            _btnPrincipal.Text = "Iniciar espejo";
-            _btnPrincipal.BackColor = Indigo;
-            _btnPrincipal.ForeColor = Color.White;
-            _btnPrincipal.FlatAppearance.BorderSize = 0;
-        }
+        EstiloBotonPrincipal(enMarcha);
 
         // ---- chips ----
         if (!enMarcha)
@@ -976,6 +1036,31 @@ internal sealed partial class PanelControl : Form
             PintarChip(_chipAuto, "Inicio manual", ChipNeutroF, ChipNeutroT);
     }
 
+    /// <summary>
+    /// "Iniciar espejo" es el unico elemento naranja de la pantalla. "Parar" es
+    /// un boton neutro: no hace falta llamar la atencion para pararlo.
+    /// </summary>
+    private void EstiloBotonPrincipal(bool enMarcha)
+    {
+        if (enMarcha)
+        {
+            _btnPrincipal.Text = "Parar";
+            _btnPrincipal.BackColor = Marca.Superficie2;
+            _btnPrincipal.ForeColor = Marca.Texto;
+            _btnPrincipal.FlatAppearance.BorderColor = Marca.Borde;
+            _btnPrincipal.FlatAppearance.BorderSize = 1;
+            _btnPrincipal.FlatAppearance.MouseOverBackColor = Marca.Superficie2Hover;
+        }
+        else
+        {
+            _btnPrincipal.Text = "Iniciar espejo";
+            _btnPrincipal.BackColor = Marca.Acento;
+            _btnPrincipal.ForeColor = Marca.AcentoTinta;
+            _btnPrincipal.FlatAppearance.BorderSize = 0;
+            _btnPrincipal.FlatAppearance.MouseOverBackColor = Marca.AcentoHover;
+        }
+    }
+
     private void PintarTarjeta(Color dot, Color fondo, Color borde, string titulo, string sub)
     {
         _dot.ForeColor = dot;
@@ -1001,7 +1086,7 @@ internal sealed partial class PanelControl : Form
 
     private void MostrarAviso(string texto)
     {
-        PintarTarjeta(RojoTexto, RojoFondo, RojoBorde, "Atencion", texto);
+        PintarTarjeta(AmbarTexto, AmbarFondo, AmbarBorde, "Atención", texto);
         _avisoHasta = DateTime.Now.AddSeconds(6);
     }
 
@@ -1087,7 +1172,7 @@ internal sealed partial class PanelControl : Form
         var pantallas = Screen.AllScreens;
         if (salida.Indice >= pantallas.Length)
         {
-            MostrarAviso("Ese monitor ya no existe. Pulsa el boton de refrescar.");
+            MostrarAviso("Ese monitor ya no existe. Pulsa el botón de refrescar.");
             return;
         }
 
@@ -1114,8 +1199,8 @@ internal sealed partial class PanelControl : Form
             var r = MessageBox.Show(
                 "Vas a capturar el mismo monitor en el que se va a mostrar el espejo, " +
                 "pero tienes desactivado 'Ocultar de capturas'.\n\n" +
-                "Lo mas probable es que salga efecto tunel (imagen dentro de imagen).\n\n" +
-                "Quieres activarlo?",
+                "Lo más probable es que salga efecto túnel (imagen dentro de imagen).\n\n" +
+                "¿Quieres activarlo?",
                 "Aviso", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
 
             if (r == DialogResult.Cancel) return;
@@ -1232,7 +1317,7 @@ internal sealed partial class PanelControl : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(informe + "\n\n(No se pudo guardar: " + ex.Message + ")", "Diagnostico");
+            MessageBox.Show(informe + "\n\n(No se pudo guardar: " + ex.Message + ")", "Diagnóstico");
         }
     }
 

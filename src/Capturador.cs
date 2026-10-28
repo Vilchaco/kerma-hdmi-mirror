@@ -94,7 +94,7 @@ internal sealed class Capturador : IDisposable
                                     dcPantalla, zona.X, zona.Y, Native.SRCCOPY);
             if (!ok)
             {
-                UltimoError = "BitBlt fallo al capturar el monitor.";
+                UltimoError = "BitBlt falló al capturar el monitor.";
                 return false;
             }
 
@@ -132,13 +132,13 @@ internal sealed class Capturador : IDisposable
     {
         if (hwnd == IntPtr.Zero || !Native.IsWindowVisible(hwnd))
         {
-            UltimoError = "La ventana de origen ya no existe o esta oculta.";
+            UltimoError = "La ventana de origen ya no existe o está oculta.";
             return false;
         }
 
         if (!Native.GetWindowRect(hwnd, out Native.RECT r))
         {
-            UltimoError = "No se pudo leer el tamano de la ventana de origen.";
+            UltimoError = "No se pudo leer el tamaño de la ventana de origen.";
             return false;
         }
 
@@ -146,7 +146,7 @@ internal sealed class Capturador : IDisposable
         int alto = r.Height;
         if (ancho <= 0 || alto <= 0)
         {
-            UltimoError = "La ventana de origen tiene tamano cero (minimizada?).";
+            UltimoError = "La ventana de origen tiene tamaño cero (¿está minimizada?).";
             return false;
         }
 
@@ -175,8 +175,8 @@ internal sealed class Capturador : IDisposable
                     if (++_framesUniformes >= 20)
                     {
                         _printWindowRoto = true;
-                        Nota = "PrintWindow devolvia una imagen vacia; " +
-                               "usando captura de pantalla del rectangulo de la ventana.";
+                        Nota = "PrintWindow devolvía una imagen vacía; " +
+                               "usando captura de pantalla del rectángulo de la ventana.";
                     }
                 }
                 else if (ok)
